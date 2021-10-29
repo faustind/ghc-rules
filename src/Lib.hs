@@ -5,6 +5,7 @@ module Lib
     ) where
 
 import GHC hiding (compileToCoreModule, compileCore, compileToCoreSimplified, CoreModule(..))
+import GhcMake (depanalPartial)
 import HscTypes (typeEnvFromEntities, msHsFilePath, TypeEnv, CgGuts(..), ModDetails(..), ModGuts(..))
 import CoreSyn (CoreProgram, CoreRule, bindersOfBinds)
 import Panic (panic)
@@ -33,7 +34,6 @@ data CoreModule
 
       cm_rules :: ![CoreRule]          -- ^ Before the core pipeline starts, contains
                                        -- See Note [Overall plumbing for rules] in Rules.hs
-      
     }
 
 
@@ -50,9 +50,9 @@ compileCore simplify fn = do
    -- First, set the target to the desired filename
    target <- guessTarget fn Nothing
    addTarget target
-   _ <- load LoadAllTargets
+   -- _ <- load LoadAllTargets
    -- Then find dependencies
-   modGraph <- depanal [] True
+   (err, modGraph) <- depanalPartial [] True
    case find ((== fn) . msHsFilePath) (mgModSummaries modGraph) of
      Just modSummary -> do
        -- Now we have the module name;
@@ -96,6 +96,6 @@ compileCore simplify fn = do
                                            (mg_fam_insts mg),
           cm_binds   = mg_binds mg,
           cm_safe    = safe_mode,
-          cm_rules    = mg_rules mg
+          cm_rules   = mg_rules mg
          }
 

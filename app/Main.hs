@@ -32,7 +32,7 @@ main = compile =<< execParser opts
           ( fullDesc
             <> progDesc "Output all rewrite rules in FILENAME to stdout"
             <> header 
-            "up-to-core -- A single module compiler for Haskell"
+            "ghc-rules -- Visualize all GHC Core rules defined in a single Haskell program"
          )
 
 
